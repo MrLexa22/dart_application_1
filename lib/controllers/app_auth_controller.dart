@@ -78,14 +78,10 @@ class AppAuthController extends ResourceController {
             ModelResponse(message: 'Поля password username email обязательны'),
       );
     }
-
     final salt = generateRandomSalt();
-
     final hashPassword = generatePasswordHash(user.password!, salt);
-
     try {
       late final int id;
-
       await managedContext.transaction((transaction) async {
         final qCreateUser = Query<User>(transaction)
           ..values.userName = user.userName
@@ -93,14 +89,10 @@ class AppAuthController extends ResourceController {
           ..values.salt = salt
           ..values.isDeleted = false
           ..values.hashPassword = hashPassword;
-
         final createdUser = await qCreateUser.insert();
-
         id = createdUser.id!;
-
         _updateTokens(id, transaction);
       });
-
       final userData = await managedContext.fetchObjectWithID<User>(id);
       AddActionHistory(
           "Insert new user",
@@ -160,26 +152,21 @@ class AppAuthController extends ResourceController {
       ..where((element) => element.id).equalTo(id)
       ..values.accessToken = tokens['access']
       ..values.refreshToken = tokens['refresh'];
-
     await qUpdateToken.updateOne();
   }
 
   Map<String, String> _getTokers(int id) {
     final key = Platform.environment['SECRET_KEY'] ?? 'SECRET_KEY';
-
     final accessClaimSet = JwtClaim(
       maxAge: const Duration(hours: 1),
       otherClaims: {'id': id},
     );
-
     final refreshClaimSet = JwtClaim(
       otherClaims: {'id': id},
     );
-
     final tokens = <String, String>{};
     tokens['access'] = issueJwtHS256(accessClaimSet, key);
     tokens['refresh'] = issueJwtHS256(refreshClaimSet, key);
-
     return tokens;
   }
 }

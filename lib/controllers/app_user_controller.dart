@@ -117,7 +117,7 @@ class AppUserController extends ResourceController {
             .toList();
       }
 
-      int pageSize = 2; //ИСПРАВИТЬ, ЭТО ДЛЯ ПРИМЕРА!
+      int pageSize = 5;
       if (page <= 0) page = 1;
       var items = usersAll.skip((page - 1) * pageSize).take(pageSize).toList();
       return Response.ok(items);
